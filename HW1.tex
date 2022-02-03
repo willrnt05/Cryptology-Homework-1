@@ -1,7 +1,13 @@
 %Source for HW1
 \documentclass[11pt]{article}
 \include{macros}
+\usepackage{algorithm}
+\usepackage{caption}
+\usepackage{comment}
+\usepackage{dirtytalk}
+\usepackage{algpseudocode}
 \usepackage{url}
+\usepackage{todonotes}
 \newcommand{\bitsoracle}{{\mathsf{Bits}}}
 \newcommand{\indcpa}{{\mathrm{IND}\mbox{-}\mathrm{CPA}}}
 \newcommand{\indrcpa}{{\mathrm{IND}\$\mbox{-}\mathrm{CPA}}}
@@ -11,6 +17,10 @@
 \newcommand{\calX}{\mathcal{X}}
 \newcommand{\thatis}{i.e. }
 \newcommand{\forexample}{e.g. }
+\def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\DeclareCaptionFormat{myformat}{#3}
+\captionsetup[algorithm]{format=myformat}
  
 %\newcommand{\Adv}{\mathrm{Adv}}
 \newcommand{\ExpPRF}[2]{\mathsf{Exp}^{\mathrm{prf}}_{#1}{(#2)}}
@@ -25,7 +35,7 @@
 \newcommand{\calV}{\mathcal{V}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{{\bf  Introduction to Modern Cryptography}\\ Problem Set 1 \\[2ex] }
+\title{{\bf  Introduction to Modern Cryptography}\\ Problem Set 1\\William Nebinger-Tobin \\ Mitali Sheth \\ In Collaboration with Yuko Matsumoto \\[2ex] }
 \date{}
 \author{}
 \begin{document}
@@ -122,19 +132,119 @@ Fix non-empty sets $\calK,\calD$ and let $F \colon \calK \times
 using resources~$t,q,\mu$.  Then there exists a PRF-adversary~$B$
 (explicitly constructed in the proof of this theorem) such that
 \[
-\AdvGuess{F,\tau}{A} \leq c_1\AdvPRF{F}{B} + c_2 \mbox{   [fill in
+\AdvGuess{F,\tau}{A} \leq 1 \AdvPRF{F}{B} + \frac{1}{{{(2^\tau)}^2}^n} \mbox{   [fill in
   appropriate (small) constants $c_1,c_2$] }
 \]
-where $B$ has time complexity~$t'+[\mbox{FILL IN}]$,
-asks $q'=[\mbox{FILL IN}]$ queries, these of total length
-$\mu'=[\mbox{FILL IN}]$.
+where $B$ has time complexity~$t'+q$,
+asks $q'=q$ queries, these of total length
+$\mu'=\mu$%[\mbox{FILL IN}]$.
 \end{theorem}
+
+\textbf{Part a.}
+
+We will use $P_r[\ExpPRF{}{B} = 1]$ and condition this probability by the challenge bit $b$ for \ExpPRF{}{B}^{\calO(\cdot)}$.We need to construct adversary $B$ to simulate adversary~$A$.
+
+\begin{comment}
+\adversaryv{$B^{\calO}$}\\
+(Y', X')$\leftarrow$ {$A^{\calO(\cdot)}$}\\
+If $\calO (X')=Y'$ then Return 1\\
+Return 0
+\end{comment}
+
+\begin{algorithm}
+\renewcommand{\thealgorithm}{}
+\caption{\textbf{adversary $B^{\calO}$}}
+\label{alg:cap}
+\begin{algorithmic}
+
+\State $(Y', X') \gets A^{\calO(\cdot)}$
+\If{$\calO (X')=Y'$}
+\State \Return 1
+\EndIf
+\State \Return 0
+\end{algorithmic}
+\end{algorithm}
+
+When challenge bit $b=1$, adversary $A$ expects $F_K$ for a random key, which perfectly simulates $A$'s queries in $F_k$ or when challenge bit $b=0$, adversary $A$ expects random function $\rho$. Thus, $P_r[\ExpPRF{}{B} = 1 \;|\; b=0] = P_r[\ExpGuess{}{A} = 1 \;|\; b=0]$.
+
+
+By construction, B has time complexity of $t'+q$, asks $q'=q$ queries, those total length $\mu'=\mu$. 
+
+\vspace{0.5cm}
+
+\underline{$b=1 \; so \; \calO = F_K$}
+
+$P_r\left[\ExpPRF{}{B} = 1 \;|\; b=1\right] $
+
+$=P_r\left[F_K(X') = Y' \right]  $
+
+$=P_r[\ExpGuess{}{A} = 1 \;|\; b=1]$
+
+($it \;is\; function\; family \;whose\; security \;is \;being \;examined$)
+
+\vspace{0.5cm}
+
+\underline{$b=1 \; so \; \calO = \rho$}
+
+$P_r[\ExpPRF{}{B} = 1 \;|\; b=0] $
+
+$= 1-P_r[\ExpPRF{}{B} = 0 \;|\; b=0]$
+
+$= 1-P_r[\rho(X') = Y'] $
+
+$= 1-\left[\frac{1}{{{(2^\tau)}^2}^m} \right]$
+
+
+$\left(b=0 : \; |\Func(m,n)| = \frac{1}{{{(2^\tau)}^2}^m}$ because $|\Func(D,R)| = \frac{1}{{{(2^R)}^2}^D}}, $ F \colon \calK \times
+\calD \to \bits^N$\right$
+
+\vspace{0.5cm}
+
+Hence, \\$P_r[\ExpPRF{}{B} = 1] = P_r[\ExpPRF{}{B} = 1 \;|\; b=1] 
++ P_r[\ExpPRF{}{B} = 1 \;|\; b=0]
+$
+
+$\AdvPRF{F}{B} = $\\
+$=2\left[\frac{1}{2}(P_r(\ExpGuess{F}{A} =1)+
+P_r(\ExpPRF{}{B} =1 \; | \; b=0)
+)\right] -1$
+
+
+$\left( \AdvPRF{F}{B} = 2\cdot P_r\left(\ExpPRF{F}{B} = 1\right) - 1 \right)$
+
+\vspace{0.5cm}
+
+$\AdvPRF{F}{B} $\\
+$=2\left[\frac{1}{2}\left((P_r(\ExpGuess{F,\tau}{A} =1) + \left[1 -
+\frac{1}{{{(2^\tau)}^2}^m}\right]\right)  \right]- 1
+= 
+\left P_r[\ExpGuess{F,\tau}{A}=1] - \frac{1}{{{(2^\tau)}^2}^m}}
+$
+
+Hence, $\AdvGuess{F,\tau}{A} \leq \AdvPRF{F}{B}+\left[\frac{1}{{{(2^\tau)}^2}^m}\right]
+$
+
+Since $c_2$ is \say{very small} we conclude that F is a secure $PRF$ and it follows that \say{Guess the LSBs} is secure, or difficult to guess LSBs.
+
+\vspace{0.5cm}
+
+
 
 ({\bf Part b.})  The security bound that you proved in Part a should be a
 function of the parameter~$\tau$.  Consider the full range of values
 for $\tau$: When is the theorem most ``useful''.  What is the
 relationship between the additive term~$c_2$ that you find, and the
 ``trivial'' winning probability?
+
+
+\textbf{Part b.}
+
+$\left|\AdvGuess{F,\tau}{A}-\AdvPRF{F}{B}\right| \leq \frac{1}{{{(2^\tau)}^2}^n}$
+
+We can expect the behaviour of the oracle. When $\AdvGuess{F, \tau}{A}$ is close to 0, then the oracle behaves random function. 
+
+Also, $P$ is a function of parameter $\tau$ and the additive term $c_2$ gets \say{tiny} when $\tau$ is a large number as its range is $2^\tau$ for all $0\leq \tau \leq N$ so the winning probability gets \say{tiny}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -237,5 +347,9 @@ its resources.
 
 Finally, write a nice theorem statement to encapsulate
 your result. 
+
+\vspace{1cm}
+
+
 \end{document}
 
